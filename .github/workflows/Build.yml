@@ -7,6 +7,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
 
@@ -24,9 +25,17 @@ jobs:
             openjdk-17-jdk unzip wget
           pip install buildozer cython==0.29.37
 
+      - name: Cache buildozer
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            .buildozer
+          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+
       - name: Build APK
         run: |
-          yes | buildozer -v android debug
+          yes | buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
