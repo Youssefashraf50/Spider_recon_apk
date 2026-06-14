@@ -1,0 +1,220 @@
+#:kivy 2.1.0
+#:import hex kivy.utils.get_color_from_hex
+
+<SpiderReconUI>:
+    canvas.before:
+        Color:
+            rgba: hex('#0d1117')
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(16)
+        spacing: dp(12)
+        
+        # Header
+        BoxLayout:
+            size_hint_y: 0.1
+            spacing: dp(10)
+            
+            Label:
+                text: "🕷️"
+                font_size: dp(36)
+                size_hint_x: 0.15
+                halign: 'center'
+            
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: "SpiderRecon"
+                    font_size: dp(24)
+                    bold: True
+                    color: hex('#00d4aa')
+                    halign: 'left'
+                    text_size: self.size
+                Label:
+                    text: "Bug Bounty Scanner - Mobile Edition"
+                    font_size: dp(12)
+                    color: hex('#8b949e')
+                    halign: 'left'
+                    text_size: self.size
+        
+        # Domain Input
+        BoxLayout:
+            size_hint_y: 0.08
+            spacing: dp(8)
+            
+            TextInput:
+                id: domain_input
+                hint_text: "example.com"
+                multiline: False
+                size_hint_x: 0.7
+                background_color: hex('#161b22')
+                foreground_color: hex('#c9d1d9')
+                hint_text_color: hex('#484f58')
+                font_size: dp(16)
+                padding: dp(12), dp(8)
+                cursor_color: hex('#00d4aa')
+            
+            Button:
+                id: start_btn
+                text: "⚡ ابدأ المسح"
+                font_size: dp(14)
+                bold: True
+                size_hint_x: 0.3
+                background_normal: ''
+                background_color: hex('#00d4aa')
+                color: hex('#0d1117')
+                on_press: root.start_scan()
+        
+        # Status Bar
+        BoxLayout:
+            size_hint_y: 0.06
+            Label:
+                id: status_label
+                text: "✨ أنتظر إدخال الدومين..."
+                font_size: dp(13)
+                color: hex('#8b949e')
+                halign: 'center'
+                text_size: self.size
+        
+        # Progress Bar
+        ProgressBar:
+            id: progress_bar
+            size_hint_y: 0.03
+            max: 100
+            value: 0
+            background_color: hex('#21262d')
+            color: hex('#00d4aa')
+        
+        # Stats Row
+        BoxLayout:
+            size_hint_y: 0.08
+            spacing: dp(8)
+            
+            # Subdomains
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: str(root.ids.subs_count.text) if hasattr(root.ids, 'subs_count') else "0"
+                    id: subs_count
+                    font_size: dp(22)
+                    bold: True
+                    color: hex('#58a6ff')
+                    halign: 'center'
+                    text_size: self.size
+                Label:
+                    text: "Subdomains"
+                    font_size: dp(10)
+                    color: hex('#8b949e')
+                    halign: 'center'
+                    text_size: self.size
+            
+            # Live
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: str(root.ids.live_count.text) if hasattr(root.ids, 'live_count') else "0"
+                    id: live_count
+                    font_size: dp(22)
+                    bold: True
+                    color: hex('#3fb950')
+                    halign: 'center'
+                    text_size: self.size
+                Label:
+                    text: "Live Hosts"
+                    font_size: dp(10)
+                    color: hex('#8b949e')
+                    halign: 'center'
+                    text_size: self.size
+            
+            # URLs
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: str(root.ids.urls_count.text) if hasattr(root.ids, 'urls_count') else "0"
+                    id: urls_count
+                    font_size: dp(22)
+                    bold: True
+                    color: hex('#d29922')
+                    halign: 'center'
+                    text_size: self.size
+                Label:
+                    text: "URLs"
+                    font_size: dp(10)
+                    color: hex('#8b949e')
+                    halign: 'center'
+                    text_size: self.size
+            
+            # Vulnerabilities
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: str(root.ids.vuln_count.text) if hasattr(root.ids, 'vuln_count') else "0"
+                    id: vuln_count
+                    font_size: dp(22)
+                    bold: True
+                    color: hex('#f85149')
+                    halign: 'center'
+                    text_size: self.size
+                Label:
+                    text: "ثغرات"
+                    font_size: dp(10)
+                    color: hex('#8b949e')
+                    halign: 'center'
+                    text_size: self.size
+        
+        # Results Tabs
+        TabbedPanel:
+            do_default_tab: False
+            background_color: hex('#161b22')
+            tab_height: dp(40)
+            
+            TabbedPanelItem:
+                text: "🔴 الثغرات"
+                
+                ScrollView:
+                    Label:
+                        id: results_text
+                        text: "انتظر نتائج الفحص..."
+                        font_size: dp(12)
+                        color: hex('#c9d1d9')
+                        text_size: (self.width - dp(20)), None
+                        size_hint_y: None
+                        height: self.texture_size[1]
+                        padding: dp(10), dp(10)
+            
+            TabbedPanelItem:
+                text: "📄 التقرير"
+                
+                BoxLayout:
+                    orientation: 'vertical'
+                    
+                    ScrollView:
+                        Label:
+                            id: report_text
+                            text: "سيظهر التقرير بعد اكتمال الفحص..."
+                            font_size: dp(11)
+                            font_name: 'monospace'
+                            color: hex('#c9d1d9')
+                            text_size: (self.width - dp(20)), None
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                            padding: dp(10), dp(10)
+                    
+                    Button:
+                        text: "📋 نسخ التقرير"
+                        size_hint_y: 0.12
+                        background_normal: ''
+                        background_color: hex('#30363d')
+                        color: hex('#c9d1d9')
+                        on_press: root.copy_report()
+        
+        # Footer
+        Label:
+            text: "SpiderRecon v1.0 | By Youssef Ashraf"
+            font_size: dp(10)
+            color: hex('#484f58')
+            size_hint_y: 0.04
