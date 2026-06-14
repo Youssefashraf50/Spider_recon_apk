@@ -22,8 +22,9 @@ jobs:
           sudo apt-get install -y \
             python3-pip build-essential git \
             python3-dev libffi-dev \
-            openjdk-17-jdk unzip wget
-          pip install buildozer cython==0.29.37
+            openjdk-17-jdk unzip wget \
+            autoconf libtool pkg-config
+          pip install buildozer cython==0.29.37 virtualenv
 
       - name: Cache buildozer
         uses: actions/cache@v4
