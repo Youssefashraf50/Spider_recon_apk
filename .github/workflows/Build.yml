@@ -20,7 +20,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             python3-pip build-essential git \
-            python3-dev libffi-ద openjdk-17-jdk unzip wget
+            python3-dev libffi-dev \
+            openjdk-17-jdk unzip wget
           pip install buildozer cython==0.29.37
 
       - name: Build APK
