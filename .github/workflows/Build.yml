@@ -1,0 +1,81 @@
+name: 🕷️ Build SpiderRecon APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:  # يسمح بالتشغيل اليدوي
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 1. تحميل الكود
+        uses: actions/checkout@v4
+
+      - name: 🐍 2. تثبيت Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 3. تثبيت المكتبات المطلوبة
+        run: |
+          pip install --upgrade pip
+          pip install buildozer cython pillow
+          sudo apt update
+          sudo apt install -y \
+            git zip unzip openjdk-17-jdk \
+            python3-pip autoconf libtool \
+            pkg-config zlib1g-dev libncurses5-dev \
+            libncursesw5-dev libtinfo5 cmake \
+            libffi-dev libssl-dev
+
+      - name: 📱 4. تحميل Android SDK و NDK
+        run: |
+          export ANDROIDSDK="$HOME/.android/sdk"
+          export ANDROIDNDK="$HOME/.android/ndk"
+          mkdir -p "$ANDROIDSDK" "$ANDROIDNDK"
+          
+          # SDK
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk.zip
+          unzip -q sdk.zip -d "$ANDROIDSDK"
+          rm sdk.zip
+          mkdir -p "$ANDROIDSDK/cmdline-tools/latest"
+          mv "$ANDROIDSDK/cmdline-tools"/* "$ANDROIDSDK/cmdline-tools/latest/" 2>/dev/null || true
+          
+          # قبول التراخيص
+          yes | "$ANDROIDSDK/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
+          
+          # NDK
+          wget -q https://dl.google.com/android/repository/android-ndk-r23b-linux.zip -O ndk.zip
+          unzip -q ndk.zip -d "$ANDROIDNDK"
+          rm ndk.zip
+          
+          echo "ANDROIDSDK=$ANDROIDSDK" >> $GITHUB_ENV
+          echo "ANDROIDNDK=$ANDROIDNDK/android-ndk-r23b" >> $GITHUB_ENV
+          echo "ANDROIDAPI=31" >> $GITHUB_ENV
+
+      - name: 🏗️ 5. بناء الـ APK
+        run: |
+          export PATH="$PATH:$ANDROIDSDK/cmdline-tools/latest/bin:$ANDROIDNDK/android-ndk-r23b"
+          
+          # تعديل buildozer.spec للمسارات
+          sed -i "s|android.sdk = .*|android.sdk = $ANDROIDSDK|" buildozer.spec
+          sed -i "s|android.ndk = .*|android.ndk = $ANDROIDNDK/android-ndk-r23b|" buildozer.spec
+          
+          # بناء الـ APK
+          buildozer -v android debug 2>&1
+
+      - name: 📦 6. رفع الـ APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SpiderRecon-APK
+          path: bin/*.apk
+          if-no-files-found: error
+
+      - name: 📊 7. عرض حجم الملف
+        run: |
+          echo "📱 حجم الـ APK:"
+          ls -lh bin/*.apk 2>/dev/null || echo "لم يتم العثور على APK"
